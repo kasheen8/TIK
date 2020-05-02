@@ -14,14 +14,16 @@ def prob_calc(n=1): #сокращение от probability calculation - фун�
         prob_list[test] = Pn
     return prob_list
 
-def prob_calc_zero(n=1): #функция для вычисления вероятностей при n повторных испытаний, до первого появления события
-    k = np.arange(1,n+1,1) #количество событий
-    prob_list = {}
-    p = sp.symbols('p')
-    for test in k:
-        Pn = np.power(1-p,test)
-        prob_list[test] = Pn
-    return prob_list
+#def prob_calc_zero(n=1): #функция для вычисления вероятностей при n повторных испытаний, до первого появления события
+    #k = np.arange(1,n+1,1) #количество событий
+    #prob_list = {}
+    #p = sp.symbols('p')
+    #for test in k:
+        #Pn = np.power(1-p,test)
+        #prob_list[test] = Pn
+    #return prob_list
+
+
 
 def prob_calc_stand_part(n=5, m=2): #функция для вычисления вероятностей выбора стандартных деталей при выборе наугад m деталей, из партии n деталей, из которых k стандартных
     x = np.arange(0,m+1,1) #количество возможных отобранных стандарных деталей
@@ -46,6 +48,27 @@ def prob_calc_stand_part(n=5, m=2): #функция для вычисления 
         full_prob_list[num_part_standart] = prob_list
 
     return full_prob_list
+
+
+def formula_to_value_0_3(formula): #преобразование формулы в значение при p = 0,3 для отобржения в таблице
+    p = sp.symbols('p')
+    formula = formula.subs(p,0.3)
+    formula = round(float(formula),5)
+    return formula
+
+def prob_calc_zero(propability):#функция для вычисления вероятности до первого появления события n
+    sum_prob = 0
+    k = 1
+    prob_list = {}
+    while sum_prob < 0.999:
+        current_prob = (1 - propability)**(k-1) * propability
+        sum_prob += current_prob
+        prob_list[k] = round(current_prob,5)
+        k += 1
+    return prob_list
+
+
+
 
 
 def formula_to_html(formula): #преобразование формулы в html-текст для отображения в таблице
@@ -73,7 +96,7 @@ def formula_to_html(formula): #преобразование формулы в ht
     formula = '<html><head/><body><p><b>' + formula + '</b></p></body></html>'
     return formula
 
-def fucn_entropy(x_list,prob_list): #функция вычисления энтропии от значений p
+def fucn_entropy(x_list,prob_list): #функция вычисления энтропии от значений p в 1 задаче
     p = sp.symbols('p')
     y = []
     for x in x_list:
@@ -86,10 +109,32 @@ def fucn_entropy(x_list,prob_list): #функция вычисления энт�
         y.append(entropy)
     return y
 
-def entropy_graph(prob_list): #функция возращает данные для графика энтропии в 1 и 2 задаче
+
+def entropy_graph(prob_list): #функция возращает данные для графика энтропии в 1 задаче
     x = np.linspace(0,1,36)
     y = fucn_entropy(x,prob_list)
     return x,y
+
+def func_entropy_zero(x_list):#функция вычисления энтропии от значений p в 2 задаче
+    y = []
+    for x in x_list:
+        if x==0 or x==1:
+            y.append(0)
+            continue
+        prob_list = prob_calc_zero(x)
+        entropy = 0
+        for k in prob_list.keys():
+            entropy += -1 * prob_list[k] * np.log2(float(prob_list[k]))
+        y.append(entropy)
+    return y
+
+
+def entropy_graph_zero(prob_list):#функция возращает данные для графика энтропии в 2 задаче
+    x = np.linspace(0,1,36)
+    y = func_entropy_zero(x)
+    print(y)
+    return x,y
+
 
 def func_entropy_for_details(x_list, prob_list): #функция вычисления энтропии для каждого из возможных значений k
     y = []

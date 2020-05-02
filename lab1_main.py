@@ -41,7 +41,10 @@ class mywindow(QtWidgets.QMainWindow): #класс приложения
             for x in range(spinBox_value + 1):
                 lable1 = QtWidgets.QLabel()
                 lable1.setStyleSheet('background-color: #FFFFFF;')
-                lable1.setText(_translate('MainWindow', math_module.formula_to_html(prob_list[x])))
+                if self.ui.checkBox.isChecked():
+                    lable1.setText(_translate('MainWindow', str(math_module.formula_to_value_0_3(prob_list[x]))))
+                else:
+                    lable1.setText(_translate('MainWindow', math_module.formula_to_html(prob_list[x])))
                 table.setItem(0, x, self.createItem(f'{x}', Qt.ItemIsSelectable))
                 table.setCellWidget(1,x,lable1)
                 table.resizeColumnsToContents()
@@ -54,29 +57,35 @@ class mywindow(QtWidgets.QMainWindow): #класс приложения
         _translate = QtCore.QCoreApplication.translate
         table = self.ui.tableWidget_2
         spinBox_value = self.ui.spinBox_2.value()
-        if spinBox_value == 0:
+        if spinBox_value < 0.1:
             table.setColumnCount(0)
             table.setRowCount(0)
+            table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            table.setFixedSize(441, 61)
             self.ui.plotWidget_2.figure.clear()
             self.ui.plotWidget_2.canvas.draw()
             self.ui.lineEdit_3.clear()
             self.ui.lineEdit_4.clear()
+            self.ui.lineEdit_7.clear()
         else:
-            table.setColumnCount(spinBox_value)
+            table.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+            table.setFixedSize(441, 75)
+            prob_list = math_module.prob_calc_zero(spinBox_value)
+            table.setColumnCount(len(prob_list))
             table.setRowCount(2)
             table.setVerticalHeaderLabels(('X', 'P'))
-            prob_list = math_module.prob_calc_zero(spinBox_value)
-            for x in range(1, spinBox_value + 1):
+            for x in sorted(prob_list):
                 lable1 = QtWidgets.QLabel()
                 lable1.setStyleSheet('background-color: #FFFFFF;')
-                lable1.setText(_translate('MainWindow', math_module.formula_to_html(prob_list[x])))
+                lable1.setText(_translate('MainWindow', str(prob_list[x])))
                 table.setItem(0, x-1, self.createItem(f'{x}', Qt.ItemIsSelectable))
                 table.setCellWidget(1, x-1, lable1)
                 table.resizeColumnsToContents()
-            graph_coord = math_module.entropy_graph(prob_list)
-            self.ui.plotWidget_2.plot(graph_coord,ylim_max = 5)
+            graph_coord = math_module.entropy_graph_zero(prob_list)
+            self.ui.plotWidget_2.plot(graph_coord,ylim_max = 7)
             self.ui.lineEdit_3.setText(f'{round(max(graph_coord[1]), 2)}')
             self.ui.lineEdit_4.setText(f'{min(graph_coord[1])}')
+            self.ui.lineEdit_7.setText(f'{max(sorted(prob_list))}')
 
     def spinBox3_value_change(self): #функция, срабатывающая при изменении значения n в Задаче 3, заполняющая таблицу, график и экстремумы
         spinboxChangeValue_details(self.ui)
